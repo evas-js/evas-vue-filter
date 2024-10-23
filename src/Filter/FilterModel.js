@@ -4,7 +4,7 @@ import FilterModelOther from './FilterModel.other'
 import FilterGroupe from './FilterModel.groupe'
 import FilterBuilder from './FilterModel.builder'
 import FilterDisplay from './FilterModel.display'
-import { QueryURL } from '../Query/QueryURL'
+import { URLQueryParams } from '@prodvair/url-query-params';
 
 export class FilterModel {
     set(target, key, value) {
@@ -40,7 +40,7 @@ export class FilterModel {
     }
 }
 
-FilterModel.$queryUrl = new QueryURL(FilterModel.queryAlias)
+FilterModel.$queryUrl = new URLQueryParams(FilterModel.queryAlias)
 
 FilterModel.isRootClass = function () {
     return this.name === 'FilterModel' // || this.entityName === null

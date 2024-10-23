@@ -1,10 +1,10 @@
-import { QueryURL } from '@prodvair/url-query-params';
+import { URLQueryParams } from '@prodvair/url-query-params';
 import { reactive } from 'vue'
 
 export const EvasFilterVue = new (function () {
     this.filterModels = reactive({})
     this.filterBuildModels = null
-    this.queryURL = new QueryURL()
+    this.queryURL = new URLQueryParams()
     this.isCleared = false
     this.beforeBuild = null
     this.afterBuild = null
