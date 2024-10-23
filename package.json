@@ -1,0 +1,27 @@
+{
+  "name": "evas-vue-filter",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evas-js/evas-vue-filter.git"
+  },
+  "keywords": [
+    "filter",
+    "filterRequest",
+    "filterBuilder"
+  ],
+  "author": "prodvair",
+  "license": "CC-BY-4.0",
+  "bugs": {
+    "url": "https://github.com/evas-js/evas-vue-filter/issues"
+  },
+  "homepage": "https://github.com/evas-js/evas-vue-filter#readme",
+  "dependencies": {
+    "@prodvair/url-query-params": "^0.0.3"
+  }
+}
