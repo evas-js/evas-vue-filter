@@ -5,29 +5,34 @@ export default FilterModel => {
     FilterModel.parseGroups = function (params, field) {
         var value = field.getDefault()
 
-        if (field instanceof FieldChild) return field.parentField.$fields[field.name] || value
-        if ([null, undefined].includes(params)) return value
+        if (field instanceof FieldChild)
+            return { value: field.parentField.$fields[field.name] || value, params }
+        if ([null, undefined].includes(params)) return { value, params }
         if (!Array.isArray(params)) params = [params]
 
-        params.forEach(param => {
-            if (param?.as === (field.as || field.name)) {
-                value = field.convertDataTypeWithDefault(param.column)
-                if (Object.keys(field.$children).length) {
-                    for (const key in field.$children) {
-                        if (
-                            field.$children[key].inValue === value &&
-                            param?.aggr &&
-                            param.aggr !== DEFAULT
-                        ) {
-                            field.$fields[key] = param.aggr
-                            this.changedField(field, key, param.aggr)
+        params = params
+            .map(param => {
+                if (param?.as === (field.as || field.name)) {
+                    value = field.convertDataTypeWithDefault(param.column)
+                    if (Object.keys(field.$children).length) {
+                        for (const key in field.$children) {
+                            if (
+                                field.$children[key].inValue === value &&
+                                param?.aggr &&
+                                param.aggr !== DEFAULT
+                            ) {
+                                field.$fields[key] = param.aggr
+                                this.changedField(field, key, param.aggr)
+                            }
                         }
                     }
+                    return
                 }
-            }
-        })
+                return param
+            })
+            .filter(param => ![null, undefined].includes(param))
 
-        return value
+        return { value, params }
     }
     FilterModel.buildGroups = function (ctx, field) {
         const fieldValue = ctx[field.name]

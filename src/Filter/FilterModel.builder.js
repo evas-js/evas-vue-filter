@@ -2,7 +2,6 @@ export default FilterModel => {
     FilterModel.buildFilter = function (ctx, params = {}) {
         var result = params || {}
         this.eachFields(field => {
-            if (field.isEmpty(ctx[field.name])) return
             if (!result[field.filter]) result[field.filter] = {}
 
             if (field.type === 'wheres') {
@@ -13,6 +12,7 @@ export default FilterModel => {
                 )
                 return
             }
+            if (field.isEmpty(ctx[field.name])) return
             if (field.type === 'groups') {
                 result[field.filter][field.type] = this.buildGroups(ctx, field)
                 return
