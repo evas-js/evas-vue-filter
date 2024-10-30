@@ -1,10 +1,13 @@
 import { FieldChild } from '../Field/Field'
 
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.parseOthers = function (params, field) {
         var value = field.getDefault()
         if (field instanceof FieldChild)
-            return { value: field.parentField.$fields[field.name] || value, params }
+            return {
+                value: field.parentField.$fields[field.name] || value,
+                params,
+            }
         if ([null, undefined].includes(params)) return { value, params }
         if (Object.keys(field.$children).length) {
             for (const key in field.$children) {

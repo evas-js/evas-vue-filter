@@ -1,7 +1,7 @@
 import { FieldChild } from '../Field/Field'
 import { DEFAULT } from '../Field/FieldBuilder'
 
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.parseGroups = function (params, field) {
         var value = field.getDefault()
 
@@ -11,7 +11,7 @@ export default FilterModel => {
         if (!Array.isArray(params)) params = [params]
 
         params = params
-            .map(param => {
+            .map((param) => {
                 if (param?.as === (field.as || field.name)) {
                     value = field.convertDataTypeWithDefault(param.column)
                     if (Object.keys(field.$children).length) {
@@ -30,7 +30,7 @@ export default FilterModel => {
                 }
                 return param
             })
-            .filter(param => ![null, undefined].includes(param))
+            .filter((param) => ![null, undefined].includes(param))
 
         return { value, params }
     }

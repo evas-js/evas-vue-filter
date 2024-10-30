@@ -1,4 +1,4 @@
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.parseWheres = function (params, field) {
         if ([null, undefined].includes(params)) return { value: field.getDefault(), params }
         if (!Array.isArray(params)) params = [params]
@@ -12,7 +12,7 @@ export default FilterModel => {
         layers.shift()
 
         params = params
-            .map(param => {
+            .map((param) => {
                 if (thisKey && param?.[thisKey]) {
                     let res = this.getLayer(layers, param[thisKey], field)
                     value = res.value
@@ -26,16 +26,16 @@ export default FilterModel => {
                 }
                 return param
             })
-            .filter(param => ![null, undefined].includes(param))
+            .filter((param) => ![null, undefined].includes(param))
         return { value, params }
     }
 
-    FilterModel.setWhersLayer = function (layers, wheres, field) {
+    FilterModel.setWheresLayer = function (layers, wheres, field) {
         const thisKey = layers ? Object.keys(layers)[0] : layers
         const conditionKey = field.valueKey === 'value' ? 'condition' : 'value'
         if (!['or', 'and'].includes(thisKey)) {
             const index = wheres.findIndex(
-                where =>
+                (where) =>
                     where?.column === layers?.column &&
                     where?.[conditionKey] === layers?.[conditionKey]
             )
@@ -47,9 +47,9 @@ export default FilterModel => {
         let hasKey = false
 
         if (wheres.length)
-            wheres = wheres.map(where => {
+            wheres = wheres.map((where) => {
                 if (where[thisKey]) {
-                    where[thisKey] = this.setWhersLayer(layers[thisKey][0], where[thisKey], field)
+                    where[thisKey] = this.setWheresLayer(layers[thisKey][0], where[thisKey], field)
                     hasKey = true
                 }
                 return where
@@ -69,11 +69,11 @@ export default FilterModel => {
         layerWhere[field.valueKey] = fieldValue
 
         if (field.layers.length)
-            field.layers.reverse().forEach(layer => {
+            field.layers.reverse().forEach((layer) => {
                 layerWhere = { [layer]: [layerWhere] }
             })
 
-        wheres = this.setWhersLayer(layerWhere, wheres, field)
+        wheres = this.setWheresLayer(layerWhere, wheres, field)
         return wheres
     }
 }

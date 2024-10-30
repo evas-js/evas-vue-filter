@@ -121,7 +121,7 @@ export class FieldBuilder {
      */
     layers(value = []) {
         if (Array.isArray(value)) {
-            value.forEach(val => {
+            value.forEach((val) => {
                 this._layers.push(val)
             })
         } else this._layers.push(value)

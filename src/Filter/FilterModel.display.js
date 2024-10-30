@@ -1,4 +1,4 @@
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.displayFields = function (fields = null) {
         if (!fields) fields = this.fields()
         let displays = {}

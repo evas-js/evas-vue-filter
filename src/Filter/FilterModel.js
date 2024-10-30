@@ -16,7 +16,7 @@ export class FilterModel {
         return new Proxy(this, this)
     }
     $fill(params) {
-        this.constructor.eachFields(field => {
+        this.constructor.eachFields((field) => {
             var funcName = 'parseOthers'
             if (field.type === 'wheres') funcName = 'parseWheres'
             if (field.type === 'groups') funcName = 'parseGroups'

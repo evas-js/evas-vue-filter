@@ -1,7 +1,7 @@
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.buildFilter = function (ctx, params = {}) {
         var result = params || {}
-        this.eachFields(field => {
+        this.eachFields((field) => {
             if (!result[field.filter]) result[field.filter] = {}
 
             if (field.type === 'wheres') {

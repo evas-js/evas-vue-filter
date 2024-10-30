@@ -30,7 +30,7 @@ const create = (defaultModels = {}) => {
     BuildFilterModels._fillModels = function (models, params, names) {
         if (!Array.isArray(names)) names = [names]
         this.otherWheres = []
-        names.forEach(name => {
+        names.forEach((name) => {
             params = models[name].$fill(params)
         })
         if (params?.wheres?.length) {
@@ -57,7 +57,7 @@ const create = (defaultModels = {}) => {
         if (!names) return incomingParams
         if (!Array.isArray(names)) names = [names]
         var result = structuredClone(incomingParams)
-        names.forEach(name => {
+        names.forEach((name) => {
             result = models[name].$buildFilter(result)
         })
 
@@ -73,13 +73,13 @@ const create = (defaultModels = {}) => {
 
     BuildFilterModels._clear = function (models, names) {
         if (!Array.isArray(names)) names = [names]
-        names.forEach(name => {
+        names.forEach((name) => {
             models[name].$clearFields()
         })
     }
 
     BuildFilterModels.prototype.clear = function (names) {
-        this.constructor._builder(this.models, names || this.names)
+        this.constructor._clear(this.models, names || this.names)
     }
     return BuildFilterModels
 }

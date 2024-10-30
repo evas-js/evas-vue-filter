@@ -14,7 +14,7 @@ export const EvasFilterVue = new (function () {
         }
         this.filterBuilder = new this.filterBuilder(this.models, this.queryURL.queryParamsParse())
         this.filterBuilder.setUrlParams = this.setUrlParams
-        
+
         app.config.globalProperties.$queryURL = this.queryURL
         app.config.globalProperties.$filter = this.filterBuilder
     }

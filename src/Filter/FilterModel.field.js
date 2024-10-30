@@ -1,7 +1,7 @@
 import { Field, FieldChild } from '../Field/Field'
 import { FieldBuilder, FieldBuilderChild, DEFAULT } from '../Field/FieldBuilder'
 
-export default FilterModel => {
+export default (FilterModel) => {
     FilterModel.setFields = function () {
         return []
     }
@@ -75,7 +75,7 @@ export default FilterModel => {
                 ? field.$children[name].change
                 : [field.$children[name].change]
             changes.length &&
-                changes.forEach(key => {
+                changes.forEach((key) => {
                     field[key] = value
                 })
         }
@@ -153,7 +153,7 @@ export default FilterModel => {
 
     Object.defineProperty(FilterModel.prototype, '$countSelected', {
         get() {
-            return this.constructor.fieldNames().filter(name => {
+            return this.constructor.fieldNames().filter((name) => {
                 const check = ![null, undefined, ''].includes(this[name])
                 if (Array.isArray(this[name])) return this[name].length
                 if (check && 'object' === typeof this[name]) return Object.keys(this[name]).length
