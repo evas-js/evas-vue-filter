@@ -21,18 +21,18 @@ export class FilterModel {
             if (field.type === 'wheres') funcName = 'parseWheres'
             if (field.type === 'groups') funcName = 'parseGroups'
 
-            var res = this.constructor[funcName](params?.[field.type], field)
-            if (params?.[field.type]) params[field.type] = res.params
+            let res = this.constructor[funcName](params?.[field.type], field)
             this.set(this, field.name, res.value)
 
             if (field.$children)
                 for (const key in field.$children) {
                     const childField = field.$children[key]
                     field.$fields = new Proxy(field.$fields, this)
-                    res = this.constructor[funcName](params?.[field.type], childField)
-                    if (params?.[field.type]) params[field.type] = res.params
-                    this.set(field.$fields, childField.name, res.value)
+                    let resChild = this.constructor[funcName](params?.[field.type], childField)
+                    if (params?.[field.type]) params[field.type] = resChild.params
+                    this.set(field.$fields, childField.name, resChild.value)
                 }
+            if (params?.[field.type]) params[field.type] = res.params
         })
         return params
     }

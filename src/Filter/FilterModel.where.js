@@ -1,4 +1,4 @@
-export default (FilterModel) => {
+export default FilterModel => {
     FilterModel.parseWheres = function (params, field) {
         if ([null, undefined].includes(params)) return { value: field.getDefault(), params }
         if (!Array.isArray(params)) params = [params]
@@ -6,36 +6,49 @@ export default (FilterModel) => {
     }
 
     FilterModel.getLayer = function (layers, params, field) {
+        const hasChange = !!field?.change?.includes?.('column')
+        const originField = hasChange ? field.parentField : field
         var value = field.getDefault()
-        const conditionKey = field.valueKey === 'value' ? 'condition' : 'value'
+        var column = originField.name
+        const conditionKey = originField.valueKey === 'value' ? 'condition' : 'value'
         const thisKey = layers[0]
         layers.shift()
 
         params = params
-            .map((param) => {
+            .map(param => {
                 if (thisKey && param?.[thisKey]) {
                     let res = this.getLayer(layers, param[thisKey], field)
                     value = res.value
                     return res.params
                 } else if (
-                    param.column === field.name &&
-                    param[conditionKey] === field[conditionKey]
+                    param[conditionKey] === originField[conditionKey] &&
+                    param?.column.includes(column)
                 ) {
-                    value = field.convertDataTypeWithDefault(param[field.valueKey])
+                    if (hasChange) {
+                        field.change.forEach(change => {
+                            value = originField[change] || []
+                            const currentValue = field.convertDataTypeWithDefault(param[change])
+                            if (!value.includes(currentValue)) value.push(currentValue)
+
+                            originField[change] = value
+                        })
+                    } else value = field.convertDataTypeWithDefault(param[field.valueKey])
                     return
                 }
                 return param
             })
-            .filter((param) => ![null, undefined].includes(param))
+            .filter(param => ![null, undefined].includes(param))
+
         return { value, params }
     }
 
     FilterModel.setWheresLayer = function (layers, wheres, field) {
         const thisKey = layers ? Object.keys(layers)[0] : layers
         const conditionKey = field.valueKey === 'value' ? 'condition' : 'value'
+
         if (!['or', 'and'].includes(thisKey)) {
             const index = wheres.findIndex(
-                (where) =>
+                where =>
                     where?.column === layers?.column &&
                     where?.[conditionKey] === layers?.[conditionKey]
             )
@@ -47,7 +60,7 @@ export default (FilterModel) => {
         let hasKey = false
 
         if (wheres.length)
-            wheres = wheres.map((where) => {
+            wheres = wheres.map(where => {
                 if (where[thisKey]) {
                     where[thisKey] = this.setWheresLayer(layers[thisKey][0], where[thisKey], field)
                     hasKey = true
@@ -61,19 +74,27 @@ export default (FilterModel) => {
     FilterModel.buildWheres = function (ctx, field, wheres) {
         if (!wheres) wheres = []
         const fieldValue = ctx[field.name]
-        let layerWhere = {
-            column: field.column || field.name,
-            condition: field.condition,
-            value: field.value,
-        }
-        layerWhere[field.valueKey] = fieldValue
+        var column = field.column || field.name
+        if (!Array.isArray(column)) column = [column]
+        if (field.isEmpty(fieldValue)) return wheres
+        let layerWhere = column.map(col => {
+            var where = {
+                column: col,
+                condition: field.condition,
+                value: field.value,
+            }
+            where[field.valueKey] = fieldValue
+            return where
+        })
 
         if (field.layers.length)
-            field.layers.reverse().forEach((layer) => {
-                layerWhere = { [layer]: [layerWhere] }
+            field.layers.reverse().forEach(layer => {
+                layerWhere = [{ [layer]: layerWhere }]
             })
 
-        wheres = this.setWheresLayer(layerWhere, wheres, field)
+        layerWhere.forEach(
+            layer => (wheres = this.setWheresLayer(layer, structuredClone(wheres), field))
+        )
         return wheres
     }
 }

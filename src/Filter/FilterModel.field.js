@@ -96,8 +96,9 @@ export default (FilterModel) => {
                         Object.entries(field.$fields).forEach(([key, val]) => {
                             if (
                                 val &&
-                                field.$children[key].inValue === value &&
-                                field.$children[key].change
+                                field.$children[key].change &&
+                                (!field.$children[key].inValue ||
+                                    field.$children[key].inValue === value)
                             )
                                 this.changedField(field, key, val)
                             else this.changedField(field, key, DEFAULT)
