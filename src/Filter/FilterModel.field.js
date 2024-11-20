@@ -127,6 +127,7 @@ export default (FilterModel) => {
             // ctx[key] = fields[key].getDefault()
             if (fields[key].$fields) this.clearFields(fields[key].$fields, fields[key].$children)
         }
+        ctx.$countSelected
     }
 
     FilterModel.prototype.$clearFields = function () {
