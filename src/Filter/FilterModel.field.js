@@ -155,9 +155,16 @@ export default (FilterModel) => {
     Object.defineProperty(FilterModel.prototype, '$countSelected', {
         get() {
             return this.constructor.fieldNames().filter((name) => {
-                const check = ![null, undefined, ''].includes(this[name])
-                if (Array.isArray(this[name])) return this[name].length
-                if (check && 'object' === typeof this[name]) return Object.keys(this[name]).length
+                const field = this.constructor.field(name)
+                const value = field[field.valueKey] || this[name]
+                if (
+                    JSON.stringify(field.getDefault()) === JSON.stringify(value) ||
+                    value === DEFAULT
+                )
+                    return false
+                if (Array.isArray(value)) return value.length
+                const check = ![null, undefined, ''].includes(value)
+                if (check && 'object' === typeof value) return Object.keys(value).length
                 return check
             }).length
         },
