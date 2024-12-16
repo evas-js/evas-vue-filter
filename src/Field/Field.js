@@ -9,6 +9,7 @@ export class Field extends Fildable {
     option = DEFAULT
     aggr = DEFAULT
     as
+    desc = false
     display = { component: 'StringField', props: {} }
     layers
     relatedField

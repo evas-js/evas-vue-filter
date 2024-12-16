@@ -12,6 +12,14 @@ export default (FilterModel) => {
                 )
                 return
             }
+            if (field.type === 'orders') {
+                result[field.filter][field.type] = this.buildOrders(
+                    ctx,
+                    field,
+                    result[field.filter][field.type]
+                )
+                return
+            }
             if (field.isEmpty(ctx[field.name])) return
             if (field.type === 'groups') {
                 result[field.filter][field.type] = this.buildGroups(ctx, field)

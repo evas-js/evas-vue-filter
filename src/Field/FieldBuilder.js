@@ -8,6 +8,7 @@ export class FieldBuilder {
     _condition = '='
     _option = DEFAULT
     _aggr = DEFAULT
+    _desc = false
     _as
     _display = { component: 'StringField', props: {} }
     _default = null
@@ -94,6 +95,15 @@ export class FieldBuilder {
      */
     as(value) {
         this._as = value
+        return this
+    }
+    /**
+     *
+     * @param {Boolean} value
+     * @returns this
+     */
+    desc(value = false) {
+        this._desc = value
         return this
     }
     /**

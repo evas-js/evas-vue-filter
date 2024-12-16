@@ -1,9 +1,10 @@
 import FilterField from './FilterModel.field'
 import FilterWhere from './FilterModel.where'
-import FilterModelOther from './FilterModel.other'
+import FilterOther from './FilterModel.other'
 import FilterGroupe from './FilterModel.groupe'
 import FilterBuilder from './FilterModel.builder'
 import FilterDisplay from './FilterModel.display'
+import FilterOrder from './FilterModel.order'
 import { URLQueryParams } from '@prodvair/url-query-params'
 
 export class FilterModel {
@@ -16,10 +17,11 @@ export class FilterModel {
         return new Proxy(this, this)
     }
     $fill(params) {
-        this.constructor.eachFields((field) => {
+        this.constructor.eachFields(field => {
             var funcName = 'parseOthers'
             if (field.type === 'wheres') funcName = 'parseWheres'
             if (field.type === 'groups') funcName = 'parseGroups'
+            if (field.type === 'orders') funcName = 'parseOrders'
 
             let res = this.constructor[funcName](params?.[field.type], field)
             this.set(this, field.name, res.value)
@@ -46,7 +48,8 @@ FilterModel.isRootClass = function () {
 
 FilterField(FilterModel)
 FilterDisplay(FilterModel)
-FilterModelOther(FilterModel)
 FilterWhere(FilterModel)
 FilterGroupe(FilterModel)
+FilterOrder(FilterModel)
+FilterOther(FilterModel)
 FilterBuilder(FilterModel)
