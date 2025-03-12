@@ -32,6 +32,7 @@ export class FilterModel {
                     field.$fields = new Proxy(field.$fields, this)
                     let resChild = this.constructor[funcName](params?.[field.type], childField)
                     if (params?.[field.type]) params[field.type] = resChild.params
+                    if (field?.linkChild?.includes(key)) this.set(this, field.name, resChild.value)
                     this.set(field.$fields, childField.name, resChild.value)
                 }
             if (params?.[field.type]) params[field.type] = res.params

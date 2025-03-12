@@ -13,6 +13,11 @@ export default FilterModel => {
         const conditionKey = originField.valueKey === 'value' ? 'condition' : 'value'
         const thisKey = layers[0]
         layers.shift()
+        const checkColumn = (first, second) => {
+            if (Array.isArray(first)) return first.includes(second)
+            if (Array.isArray(second)) return second.includes(first)
+            return first === second
+        }
 
         params = params
             .map(param => {
@@ -22,7 +27,7 @@ export default FilterModel => {
                     return res.params
                 } else if (
                     param[conditionKey] === originField[conditionKey] &&
-                    param?.column.includes(column)
+                    checkColumn(param?.column, column)
                 ) {
                     if (hasChange) {
                         field.change.forEach(change => {

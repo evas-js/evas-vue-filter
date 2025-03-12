@@ -13,6 +13,7 @@ export class Field extends Fildable {
     display = { component: 'StringField', props: {} }
     layers
     relatedField
+    linkChild = []
 
     constructor(props) {
         super(props)

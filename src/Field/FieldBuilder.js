@@ -14,6 +14,7 @@ export class FieldBuilder {
     _default = null
     _layers = []
     _relatedField
+    _linkChild = []
 
     $children
     $fields
@@ -160,6 +161,16 @@ export class FieldBuilder {
      */
     relatedField(value) {
         this._relatedField = value
+        return this
+    }
+
+    /**
+     *
+     * @param {Array} value
+     * @returns this
+     */
+    linkChild(value) {
+        this._linkChild = [value].flat()
         return this
     }
 

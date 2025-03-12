@@ -108,12 +108,17 @@ export default (FilterModel) => {
             return ctx[currentName]
         }
         names.shift()
-        return this.impactField(
+        const resultValue = this.impactField(
             this.field(currentName).$fields,
             names,
             value,
             this.field(currentName)
         )
+        if (JSON.stringify(this.field(currentName)?.linkChild || {}) === JSON.stringify(names)) {
+            ctx[currentName] = resultValue
+        }
+
+        return resultValue
     }
 
     FilterModel.prototype.$impactField = function (names, value) {
