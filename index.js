@@ -1,10 +1,10 @@
 import { URLQueryParams } from '@prodvair/url-query-params'
-import { reactive } from 'vue'
-import BuildFilterModels from './BuildFilterModels'
+// import { reactive } from 'vue'
+import { BuildFilterModels } from './BuildFilterModels'
 import { FilterModel } from './src/Filter/FilterModel'
 
 const EvasVueFilter = new (function () {
-    this.filterBuilder = BuildFilterModels(reactive({}))
+    this.filterBuilder = null
     this.filters = {}
     this.queryURL = new URLQueryParams()
 
@@ -13,7 +13,7 @@ const EvasVueFilter = new (function () {
             if (options.filters) this.models = options.filters
             if (options.queryAlias) this.queryURL.constructor.queryAlias = options.queryAlias
         }
-        this.filterBuilder = new this.filterBuilder(this.models, this.queryURL.queryParamsParse())
+        this.filterBuilder = new BuildFilterModels(this.models, this.queryURL.queryParamsParse())
         this.filterBuilder.setUrlParams = this.setUrlParams
 
         app.config.globalProperties.$queryURL = this.queryURL
