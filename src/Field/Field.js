@@ -10,12 +10,10 @@ import { Field as MainField } from 'evas-vue'
 export class Field extends MainField {
     /** @var { String } тип фильтра */
     filter
-
     /** @var { Object|Array } тип фильтра */
     filterBuilder
-
-    /** @var { Boolean } Скрыть из queryParams */
-    hidden = false
+    /** @var { Boolean } Показать/Скерыть из queryParams */
+    queryable = true
 
     /**
      * @param { Object|null } props свойства поля
@@ -23,5 +21,9 @@ export class Field extends MainField {
     constructor(props) {
         super()
         this.setProps(props)
+    }
+
+    get labelOrName() {
+        return this.label || this.column || this.name
     }
 }

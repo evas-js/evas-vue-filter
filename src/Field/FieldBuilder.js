@@ -22,8 +22,8 @@ export class FieldBuilder extends MainFieldBuilder {
     _filter
     /** @var { Function } Маска фильтра */
     _filterBuilder
-    /** @var { Boolean } Скрыть из queryParams */
-    _hidden = false
+    /** @var { Boolean } Показать/Скерыть из queryParams */
+    _queryable = true
 
     /**
      * @param { Object|null } props свойства поля
@@ -33,8 +33,9 @@ export class FieldBuilder extends MainFieldBuilder {
         this._required = false
         this.setProps(props)
     }
-    hidden(value = true) {
-        this._hidden = value
+
+    queryable(value = true) {
+        this._queryable = value
         return this
     }
 
@@ -77,7 +78,7 @@ export class FieldBuilder extends MainFieldBuilder {
                 result.groups = ctx[name].groups.map(item => {
                     const aggr = item?.aggr || field.aggr
                     const column = item?.column ?? item?.key ?? item
-                    const as = item?.as ?? field.as
+                    const as = item?.as ?? field.as ?? name
                     return { column, aggr, option: aggr, as }
                 })
             }
