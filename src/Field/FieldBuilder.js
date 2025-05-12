@@ -124,6 +124,10 @@ export class FieldBuilder extends MainFieldBuilder {
 
         return this
     }
+    filterBuilder(value) {
+        this._filterBuilder = value
+        return this
+    }
 
     build(name, model) {
         // if (!this._filter) {
