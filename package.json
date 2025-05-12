@@ -1,6 +1,6 @@
 {
     "name": "evas-vue-filter",
-    "version": "0.0.10",
+    "version": "1.0.1",
     "description": "",
     "main": "index.js",
     "scripts": {
