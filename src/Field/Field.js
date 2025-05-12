@@ -1,32 +1,27 @@
-import { setProps, DEFAULT } from './FieldBuilder'
-import { Fildable } from './Fildable'
+/**
+ * Поле.
+ * @package evas-vue-filter
+ * @author Almaz Farkhutdinov <prodvair.almaz@ya.ru>
+ * @license CC-BY-4.0
+ */
 
-export class Field extends Fildable {
-    column
-    value
-    valueKey = 'value'
-    condition = '='
-    option = DEFAULT
-    aggr = DEFAULT
-    as
-    desc = false
-    display = { component: 'StringField', props: {} }
-    layers
-    relatedField
-    linkChild = []
+import { Field as MainField } from 'evas-vue'
 
+export class Field extends MainField {
+    /** @var { String } тип фильтра */
+    filter
+
+    /** @var { Object|Array } тип фильтра */
+    filterBuilder
+
+    /** @var { Boolean } Скрыть из queryParams */
+    hidden = false
+
+    /**
+     * @param { Object|null } props свойства поля
+     */
     constructor(props) {
-        super(props)
-        setProps(this, props)
-    }
-}
-
-export class FieldChild extends Field {
-    parentField
-    inValue
-    change
-    constructor(props) {
-        super(props)
-        setProps(this, props)
+        super()
+        this.setProps(props)
     }
 }

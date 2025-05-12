@@ -1,227 +1,139 @@
-export const DEFAULT = 'default'
+/**
+ * Сборщик поля.
+ * @package evas-vue-filter
+ * @author Almaz Farkhutdinov <prodvair.almaz@ya.ru>
+ * @license CC-BY-4.0
+ */
 
-export class FieldBuilder {
+import { Field } from './Field.js'
+import { FieldBuilder as MainFieldBuilder } from 'evas-vue/src/Field'
+
+export const addParamBuilder = (ctx, name, defaultValue = null) => {
+    const key = `_${name}`
+    ctx[key] = defaultValue
+    ctx[name] = function (value = defaultValue) {
+        ctx[key] = value
+        return ctx
+    }
+}
+
+export class FieldBuilder extends MainFieldBuilder {
+    /** @var { String } тип фильтра */
     _filter
-    _column
-    _value
-    _valueKey = 'value'
-    _condition = '='
-    _option = DEFAULT
-    _aggr = DEFAULT
-    _desc = false
-    _as
-    _display = { component: 'StringField', props: {} }
-    _default = null
-    _layers = []
-    _relatedField
-    _linkChild = []
+    /** @var { Function } Маска фильтра */
+    _filterBuilder
+    /** @var { Boolean } Скрыть из queryParams */
+    _hidden = false
 
-    $children
-    $fields
-
+    /**
+     * @param { Object|null } props свойства поля
+     */
     constructor(props) {
-        setProps(this, props)
+        super()
+        this._required = false
+        this.setProps(props)
     }
-
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    filter(value) {
-        if (!value && this?._parentField) this._filter = this._parentField._filter
-        else this._filter = value
-        return this
-    }
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    column(value) {
-        this._column = value
-        return this
-    }
-    /**
-     *
-     * @param {String|Array|Object|Number} value
-     * @returns this
-     */
-    value(value) {
-        this._value = value
+    hidden(value = true) {
+        this._hidden = value
         return this
     }
 
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    valueKey(value) {
-        this._valueKey = value
-        return this
-    }
+    wheres() {
+        this._filter = 'wheres'
 
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    condition(value = '=') {
-        this._condition = value
-        return this
-    }
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    option(value = DEFAULT) {
-        this._option = value
-        return this
-    }
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    aggr(value = DEFAULT) {
-        this._aggr = value
-        return this
-    }
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    as(value) {
-        this._as = value
-        return this
-    }
-    /**
-     *
-     * @param {Boolean} value
-     * @returns this
-     */
-    desc(value = false) {
-        this._desc = value
-        return this
-    }
-    /**
-     *
-     * @param {component: String, props: Object} value
-     * @returns this
-     */
-    display(value, text) {
-        this._display = { ...value, text }
-        return this
-    }
-    /**
-     *
-     * @param {String|Array|Object|Number} value
-     * @returns this
-     */
-    default(value = null) {
-        this._default = value
-        return this
-    }
-    /**
-     *
-     * @param {String | String[]} value
-     * @returns this
-     */
-    layers(value = []) {
-        if (Array.isArray(value)) {
-            value.forEach((val) => {
-                this._layers.push(val)
-            })
-        } else this._layers.push(value)
-        return this
-    }
+        addParamBuilder(this, 'column', this._name)
+        addParamBuilder(this, 'condition', this._type === 'array' ? 'in' : '=')
 
-    /**
-     *
-     * @param {Object} value
-     * @returns this
-     */
-    children(value) {
-        if (!value && 'object' === typeof value && Array.isArray(value)) return this
-        // for (const key in value) {
-        //     value[key].parentField(this)
-        // }
-        this.$children = value
-        this.$fields = new Proxy({}, {})
-        return this
-    }
-
-    /**
-     *
-     * @param {String} value
-     * @returns this
-     */
-    relatedField(value) {
-        this._relatedField = value
-        return this
-    }
-
-    /**
-     *
-     * @param {Array} value
-     * @returns this
-     */
-    linkChild(value) {
-        this._linkChild = [value].flat()
-        return this
-    }
-
-    /**
-     * Экспорт свойств для поля/вариативного поля.
-     * @return Object
-     */
-    export() {
-        let data = {}
-        Object.entries(this).forEach(([key, value]) => {
-            if (key[0] !== '$') key = key.substring(1)
-            data[key] = value
+        this._filterBuilder = (ctx, name) => ({
+            column: ctx.$field(name).column || name,
+            condition: ctx.$field(name).condition,
+            value: ctx[name],
         })
-        return data
-    }
-}
 
-export class FieldBuilderChild extends FieldBuilder {
-    _parentField
-    _inValue
-    _change
-
-    parentField(value) {
-        this._parentField = value
         return this
     }
-    inValue(value) {
-        this._inValue = value
-        return this
-    }
-    change(value) {
-        this._change = value
-        return this
-    }
-}
+    globalSearch() {
+        this._filter = 'globalSearch'
 
-export function setProps(ctx, props) {
-    if (props) {
-        if (props instanceof FieldBuilder || props instanceof FieldBuilderChild) {
-            props = props.export()
-        }
-        if ('object' === typeof props && !Array.isArray(props)) {
-            for (let key in props) {
-                ctx[key] = props[key]
+        this._filterBuilder = (ctx, name) => ({
+            query: ctx.$field(`${name}->query`).convertTypeWithDefault(ctx[name].query) ?? '',
+            columns: ctx.$field(`${name}->columns`).convertTypeWithDefault(ctx[name].columns) ?? [],
+        })
+
+        return this
+    }
+    groups(as = null) {
+        this._filter = 'groups'
+
+        addParamBuilder(this, 'aggr', 'default')
+        addParamBuilder(this, 'as', as)
+
+        this._filterBuilder = (ctx, name) => {
+            const field = ctx.$field(name)
+            if (!field.as) return
+            const result = {}
+            if (field.itemOf.groups) {
+                if (!ctx[name].groups) return
+                result.groups = ctx[name].groups.map(item => {
+                    const aggr = item?.aggr || field.aggr
+                    const column = item?.column ?? item?.key ?? item
+                    const as = item?.as ?? field.as
+                    return { column, aggr, option: aggr, as }
+                })
             }
-        } else {
-            console.error(
-                'Field props must be an object or an instanceof FieldBuilder,',
-                `${typeof props} given`,
-                props
-            )
+            if (field.itemOf.fields) {
+                const value = field.itemOf.fields.convertTypeWithDefault(ctx[name].fields)
+                if (!value) return
+                result.fields = value
+            }
+            return result
         }
+
+        return this
+    }
+    orders() {
+        this._filter = 'orders'
+
+        addParamBuilder(this, 'column', this._name)
+
+        this._filterBuilder = (ctx, name) => ({
+            column: ctx.$field(name).column || name,
+            desc: ctx[name],
+        })
+
+        return this
+    }
+    page() {
+        this._filter = 'page'
+
+        this._filterBuilder = (ctx, name) => Number(ctx[name])
+
+        return this
+    }
+    limit() {
+        this._filter = 'limit'
+
+        this._filterBuilder = (ctx, name) => Number(ctx[name])
+
+        return this
+    }
+    other() {
+        this._filter = 'other'
+
+        this._filterBuilder = (ctx, name) => ctx[name]
+
+        return this
+    }
+
+    build(name, model) {
+        // if (!this._filter) {
+        //     console.warn('The Field is not have filter type')
+        //     return
+        // }
+        // if ('function' !== typeof this._filterBuilder) {
+        //     console.warn('The Field is not have filter mask or filter mask is not function')
+        //     return
+        // }
+        return this.recursiveBuild(name, model, new Field(this), 'itemOf')
     }
 }

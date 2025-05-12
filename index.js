@@ -1,37 +1,34 @@
 import { URLQueryParams } from '@prodvair/url-query-params'
-// import { reactive } from 'vue'
-import { BuildFilterModels } from './BuildFilterModels'
-import { FilterModel } from './src/Filter/FilterModel'
+import { reactive } from 'vue'
+
+export { FilterModel } from './src/Filter/FilterModel'
+export { Collapse } from './src/Filter/FieldGroupping'
+export { Field, VariableField } from './src/Field'
+export { CONDITION, AGGREGATE } from './src/Field/Help'
+export { buildDefault, buildArray, buildObject } from './src/Filter/FilterModel.contract'
 
 const EvasVueFilter = new (function () {
-    this.filterBuilder = null
-    this.filters = {}
+    this.filters = reactive({})
     this.queryURL = new URLQueryParams()
 
     this.install = (app, options) => {
         if (options) {
-            if (options.filters) this.models = options.filters
             if (options.queryAlias) this.queryURL.constructor.queryAlias = options.queryAlias
+            if (options.filters) this.setFilters(options.filters, options?.queryAlias)
         }
-        this.filterBuilder = new BuildFilterModels(this.models, this.queryURL.queryParamsParse())
-        this.filterBuilder.setUrlParams = this.setUrlParams
-
         app.config.globalProperties.$queryURL = this.queryURL
-        app.config.globalProperties.$filter = this.filterBuilder
+        app.config.globalProperties.$filters = this.filters
+        app.config.globalProperties.$replaceUrlParams = query =>
+            app.$router.replace(`${app.$route.path}?${query}`)
     }
 
-    this.setUrlParams = (app, params) => {
-        if (params?.filters) {
-            params = { ...params, ...params.filters }
-            delete params.filters
-        }
-        if (params?.groups) {
-            params.groups = params.groups.groups
-            delete params.groups.fields
-        }
-
-        app.$router.replace(`${app.$route.path}?${this.queryURL.queryParamsBuild(params)}`)
+    this.setFilters = (filters, queryAlias) => {
+        Object.entries(filters).forEach(([name, filter]) => {
+            filter.queryAlias = queryAlias || {}
+            filter.entityName = name
+            this.filter[name] = filter
+        })
     }
 })()
 
-export { EvasVueFilter, FilterModel }
+export { EvasVueFilter }
