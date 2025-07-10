@@ -19,9 +19,9 @@ export class FilterModel {
         target[key] = value
         return true
     }
-    constructor(data = {}) {
-        if (!data) data = this.constructor.$queryUrl.queryParamsParse()
+    constructor(data = {}, setQuery = false) {
         this.$fill(data)
+        if (setQuery) this.$setQueryDataIfExist()
         return new Proxy(this, this)
     }
 
@@ -30,11 +30,25 @@ export class FilterModel {
     }
 }
 
+FilterModel.prototype.$setQueryDataIfExist = function () {
+    const queryData = this.constructor.$queryUrl.queryParamsParse()
+    if (!queryData) return
+    let fieldTypeData = {}
+    Object.keys(queryData).forEach(fieldName => {
+        const field = this.$field(fieldName)
+        if (!field) return
+        if (!fieldTypeData[field.filter]) fieldTypeData[field.filter] = {}
+        fieldTypeData[field.filter][fieldName] = queryData[fieldName]
+    })
+    Object.keys(fieldTypeData).forEach(type => this.$resetFieldsByType(type, fieldTypeData[type]))
+}
+
 /**
  * Заполнение свойств записи.
  * @param Object данные [имя поля/связи => значение]
  */
 FilterModel.prototype.$fill = function (data) {
+    const queryData = this.constructor.$queryUrl.queryParamsParse()
     this.constructor.eachFields(field => {
         // конвертируем тип значения
         // this[field.name] = field.convertTypeWithDefault(data[field.name])
@@ -51,7 +65,14 @@ Object.defineProperty(FilterModel.prototype, '$queryParams', {
     get: function () {
         let params = {}
         this.constructor.eachFields(field => {
-            if (!field.hidden) params[field.name] = this[field.name]
+            let value = this[field.name]
+            'object' === field.type &&
+                field.filter !== 'globalSearch' &&
+                value &&
+                Object.keys(field.itemOf).forEach(key => {
+                    if (field.isEmptyValue(this[field.name]?.[key])) value = null
+                })
+            if (field.queryable) params[field.name] = value
         })
         return this.constructor.$queryUrl.queryParamsBuild(params)
     },

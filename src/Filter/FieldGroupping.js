@@ -9,19 +9,20 @@ import { Group } from 'evas-vue'
 
 export class Collapse extends Group {
     type = 'collapse'
-    count = 0
-    // regular = false
-    constructor(name, items, count = 0) {
+    props = {}
+    ctx
+    countNames = []
+
+    constructor(name, items, ctx, props = {}) {
         super(name, items)
-        this.setCount(count)
+        this.ctx = ctx
+        this.props = props
+        this.countNames = items
     }
     setItems(items) {
         this.setItemsInBlock(items)
     }
-    setCount(count = 0) {
-        this.count = count
+    get count() {
+        return this.ctx.$dirtyFieldsCount(this.countNames)
     }
-    // setRegular(value = true) {
-    //     this.regular = value
-    // }
 }

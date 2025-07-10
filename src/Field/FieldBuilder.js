@@ -12,7 +12,7 @@ export const addParamBuilder = (ctx, name, defaultValue = null) => {
     const key = `_${name}`
     ctx[key] = defaultValue
     ctx[name] = function (value = defaultValue) {
-        ctx[key] = value
+        ctx[key] = 'function' === typeof value ? value() : value
         return ctx
     }
 }
@@ -39,10 +39,10 @@ export class FieldBuilder extends MainFieldBuilder {
         return this
     }
 
-    wheres() {
+    wheres(column = null) {
         this._filter = 'wheres'
 
-        addParamBuilder(this, 'column', this._name)
+        addParamBuilder(this, 'column', column ?? this._name)
         addParamBuilder(this, 'condition', this._type === 'array' ? 'in' : '=')
 
         this._filterBuilder = (ctx, name) => ({
@@ -63,39 +63,73 @@ export class FieldBuilder extends MainFieldBuilder {
 
         return this
     }
-    groups(as = null) {
+    groups(as = null, groupeFields = null, column = null) {
         this._filter = 'groups'
 
-        addParamBuilder(this, 'aggr', 'default')
-        addParamBuilder(this, 'as', as)
+        if (this.type === 'array') {
+            Object.keys(this.itemOf).forEach(key => {
+                const subCTX = this.itemOf[key]
+                addParamBuilder(subCTX, 'aggr', 'default')
+                addParamBuilder(subCTX, 'as', as ?? subCTX._name)
+                addParamBuilder(subCTX, 'column', column ?? subCTX._name)
+            })
+        } else {
+            addParamBuilder(this, 'aggr', 'default')
+            addParamBuilder(this, 'as', as ?? this._name)
+            addParamBuilder(this, 'column', column ?? this._name)
+        }
+
+        addParamBuilder(this, 'groupeFields', groupeFields ?? this.groupeFields)
 
         this._filterBuilder = (ctx, name) => {
             const field = ctx.$field(name)
             if (!field.as) return
+            const groupeFields = field.groupeFields
             const result = {}
-            if (field.itemOf.groups) {
-                if (!ctx[name].groups) return
-                result.groups = ctx[name].groups.map(item => {
-                    const aggr = item?.aggr || field.aggr
+            if (groupeFields) {
+                if ('string' === typeof groupeFields) {
+                    var groupeFieldsValue = []
+                    const path = `${groupeFields ?? ''}`.split('->')
+                    path.forEach(key => {
+                        groupeFieldsValue = groupeFieldsValue[key] ?? ctx[key]
+                    })
+                    result.fields = groupeFieldsValue
+                } else if ('object' === typeof groupeFields && groupeFields !== null)
+                    result.fields = groupeFields
+                else return
+            }
+            const value = ctx[name]
+            if (field.isEmptyValue(value)) return
+
+            if (value === true) {
+                const aggr = field?.aggr
+                const column = field?.column ?? name
+                const as = field.as ?? name
+                result.groups = { column, aggr, option: aggr, as }
+            } else if (field.type === 'array' && value.length > 0) {
+                result.groups = ctx[name].map((item, i) => {
+                    const subField = ctx.$field(`${name}->${i}`)
                     const column = item?.column ?? item?.key ?? item
-                    const as = item?.as ?? field.as ?? name
+                    const aggr = item?.aggr ?? subField?.aggr ?? field.aggr
+                    const as = item?.as ?? subField?.as ?? field.as ?? name
                     return { column, aggr, option: aggr, as }
                 })
-            }
-            if (field.itemOf.fields) {
-                const value = field.itemOf.fields.convertTypeWithDefault(ctx[name].fields)
-                if (!value) return
-                result.fields = value
-            }
+            } else if (field.type === 'object' && Object.keys(value).length > 0) {
+                const column = value?.column ?? value?.key ?? value
+                const aggr = value?.aggr ?? field?.aggr
+                const as = value?.as ?? field?.as ?? name
+                result.groups = { column, aggr, option: aggr, as }
+            } else return
+
             return result
         }
 
         return this
     }
-    orders() {
+    orders(column = null) {
         this._filter = 'orders'
 
-        addParamBuilder(this, 'column', this._name)
+        addParamBuilder(this, 'column', column ?? this._name)
 
         this._filterBuilder = (ctx, name) => ({
             column: ctx.$field(name).column || name,

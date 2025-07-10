@@ -93,8 +93,6 @@ FilterModel.prototype.$isDirtyRelateds = function (relation) {
  * @return String[]
  */
 FilterModel.prototype.$dirtyFields = function (names) {
-    console.log(names, '!!!')
-
     let dirty = []
     this.constructor.eachFields(field => {
         if (this.$isDirtyField(field.name)) dirty.push(field.name)
@@ -126,9 +124,13 @@ FilterModel.prototype.$isDirtyField = function (name) {
     let value = this[name]
     if (Array.isArray(defaultValue) && Array.isArray(value)) {
         return JSON.stringify(defaultValue.sort()) !== JSON.stringify(value.sort())
-    } else if (typeof value === 'object' && ![null, undefined].includes(value)) {
+    } else if (
+        !Array.isArray(value) &&
+        typeof value === 'object' &&
+        ![null, undefined].includes(value)
+    ) {
         return JSON.stringify(defaultValue) !== JSON.stringify(value)
-    } else if ([null, undefined].includes(value) && value === '') {
+    } else if ([null, undefined].includes(defaultValue) && (value === '' || value?.length < 1)) {
         return false
     }
     return defaultValue !== value
@@ -140,5 +142,40 @@ FilterModel.prototype.$isDirtyField = function (name) {
  * @return Array имена полей
  */
 FilterModel.prototype.$dirtyFieldsCount = function (names) {
-    return this.$dirtyFields(names?.map(name => (name ?? '').split('->')[0]))?.length || 0
+    // const getNames = names => {
+    //     if (names?.items) names = Object.values(names.items)
+    //     if (Array.isArray(names) && 'string' === typeof names[0]) return names
+    //     return names
+    // }
+
+    return (
+        this.$dirtyFields(
+            (names?.items ? Object.values(names.items) : names)?.map(
+                (name, key) => (String(name) ?? String(key) ?? '').split('->')[0]
+            )
+        )?.length || 0
+    )
 }
+
+/**
+ * @var Object изменённые данные {key: val, ...}
+ */
+Object.defineProperty(FilterModel.prototype, '$dataToSave', {
+    get: function () {
+        let data = {}
+        this.constructor.eachFields(field => {
+            if (this.$isDirtyField(field.name) || field.isEmptyValue(this[field.name]))
+                dirty.push(field.name)
+        }, names)
+        let defaultValue = this.$field().getDefault()
+        let value = this[name]
+        if (Array.isArray(defaultValue) && Array.isArray(value)) {
+            return JSON.stringify(defaultValue.sort()) !== JSON.stringify(value.sort())
+        } else if (typeof value === 'object' && ![null, undefined].includes(value)) {
+            return JSON.stringify(defaultValue) !== JSON.stringify(value)
+        } else if ([null, undefined].includes(value) && value === '') {
+            return false
+        }
+        return defaultValue !== value
+    },
+})

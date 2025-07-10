@@ -14,7 +14,7 @@ export const buildDefault = (ctx, fieldNames) => {
 }
 
 export const buildArray = (ctx, fieldNames) =>
-    fieldNames && fieldNames.map(name => ctx.$field(name).filterBuilder(ctx, name)).flat(Infinity)
+    fieldNames && fieldNames.map(name => ctx.$field(name).filterBuilder(ctx, name))
 
 export const buildObject = (ctx, fieldNames) =>
     fieldNames &&
@@ -38,15 +38,28 @@ const DEFAULT_CONTRACTS = {
             : defaultResult
     },
     groups: (body, ctx, fieldNames) => {
-        body.groups = fieldNames?.length ? buildDefault(ctx, fieldNames) || null : null
+        buildArray(ctx, fieldNames)?.forEach?.(item => {
+            if (!item?.groups) return
+            if (!body.groups) body.groups = { fields: [], groups: [] }
+
+            if (Array.isArray(item.fields)) {
+                body.groups.fields = [...body.groups.fields, ...item.fields]
+            } else body.groups.fields.push(item.fields)
+
+            if (Array.isArray(item.groups)) {
+                body.groups.groups = [...body.groups.groups, ...item.groups]
+            } else body.groups.groups.push(item.groups)
+        })
     },
     orders: (body, ctx, fieldNames) => {
         if (!body?.orders) body.orders = []
-        if (fieldNames?.length) body.orders = [...body.orders, ...buildArray(ctx, fieldNames)]
+        if (fieldNames?.length)
+            body.orders = [...body.orders, ...buildArray(ctx, fieldNames).flat(Infinity)]
     },
     wheres: (body, ctx, fieldNames) => {
         if (!body?.wheres) body.wheres = []
-        if (fieldNames?.length) body.wheres = [...body.wheres, ...buildArray(ctx, fieldNames)]
+        if (fieldNames?.length)
+            body.wheres = [...body.wheres, ...buildArray(ctx, fieldNames).flat(Infinity)]
     },
     page: (body, ctx, fieldNames) => {
         body.page = fieldNames?.length ? buildDefault(ctx, fieldNames) : 1
@@ -93,12 +106,11 @@ Object.defineProperty(FilterModel, '$contractsNames', {
 FilterModel.$fieldsByTypeOfContract = function (ctx, checkValid = false) {
     let filedNamesByType = {}
     this.eachFields(field => {
+        const value = ctx[field.name]
+        const isEmpty = Array.isArray(value) ? value.length < 1 : field.isEmptyValue(value)
+
         if (!filedNamesByType?.[field.filter]) filedNamesByType[field.filter] = []
-        if (
-            this.$contracts[field.filter] &&
-            (!checkValid || field.isValid(ctx[field.name])) &&
-            !field.isEmptyValue(ctx[field.name])
-        ) {
+        if (this.$contracts[field.filter] && !isEmpty && (!checkValid || field.isValid(value))) {
             filedNamesByType[field.filter].push(field.name)
         }
     })
@@ -119,6 +131,7 @@ FilterModel.getBody = function (ctx, filedNamesByType, rules = {}, body = new Pr
 }
 
 FilterModel.prototype.$createRequestBody = function () {
+    this.$closeCollapses()
     return this.constructor.getBody(
         this,
         this.constructor.$fieldsByTypeOfContract(this, true),

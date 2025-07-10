@@ -218,3 +218,21 @@ FilterModel.prototype.$clearFields = function (fieldNames = null) {
     })
     return fieldNames
 }
+
+FilterModel.fieldsByType = function (type, names = null) {
+    const fieldNames = []
+    this.eachFields(field => {
+        if (field.filter === type) fieldNames.push(field)
+    }, names)
+    return fieldNames
+}
+
+FilterModel.prototype.$fieldsByType = function (type, names = null) {
+    return this.constructor.fieldsByType(type, names)
+}
+
+FilterModel.prototype.$resetFieldsByType = function (type, defaultParam = {}, names = null) {
+    this.$fieldsByType(type, names).forEach(field => {
+        this[field.name] = field.convertTypeWithDefault(defaultParam?.[field.name])
+    })
+}

@@ -26,7 +26,7 @@ const EvasVueFilter = new (function () {
         Object.entries(filters).forEach(([name, filter]) => {
             filter.queryAlias = queryAlias || {}
             filter.entityName = name
-            this.filter[name] = filter
+            this.filters[name] = filter
         })
     }
 })()
