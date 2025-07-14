@@ -24,7 +24,7 @@
     },
     "homepage": "https://github.com/evas-js/evas-vue-filter#readme",
     "dependencies": {
-        "evas-vue": "^1.2.24",
+        "evas-vue": "^1.2.25",
         "@prodvair/url-query-params": "^0.0.6"
     }
 }
