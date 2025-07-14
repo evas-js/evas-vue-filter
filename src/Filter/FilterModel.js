@@ -51,8 +51,12 @@ FilterModel.prototype.$fill = function (data) {
     const queryData = this.constructor.$queryUrl.queryParamsParse()
     this.constructor.eachFields(field => {
         // конвертируем тип значения
-        // this[field.name] = field.convertTypeWithDefault(data[field.name])
-        this.set(this, field.name, field.convertTypeWithDefault(data?.[field.name]))
+        const value = field.convertTypeWithDefault(data?.[field.name])
+        this.set(
+            this,
+            field.name,
+            'object' === typeof value && value ? structuredClone(value) : value
+        )
     })
 }
 

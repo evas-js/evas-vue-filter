@@ -1,6 +1,6 @@
 {
     "name": "evas-vue-filter",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "",
     "main": "index.js",
     "scripts": {
@@ -13,7 +13,9 @@
     "keywords": [
         "filter",
         "filterRequest",
-        "filterBuilder"
+        "filterBuilder",
+        "requestBuider",
+        "requestContract"
     ],
     "author": "prodvair",
     "license": "CC-BY-4.0",
