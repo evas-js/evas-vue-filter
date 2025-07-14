@@ -26,4 +26,15 @@ export class Field extends MainField {
     get labelOrName() {
         return this.label || this.column || this.name
     }
+
+    /**
+     * Получение значения по умолчанию.
+     * @return { any }
+     */
+    getDefault() {
+        const defaultValue = 'function' === typeof this.default ? this.default() : this.default
+        return 'object' === typeof defaultValue && defaultValue
+            ? structuredClone(defaultValue)
+            : defaultValue
+    }
 }

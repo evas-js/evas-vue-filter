@@ -13,9 +13,7 @@ export class FilterModel {
 
     set(target, key, value) {
         const field = target.constructor?.field(key)
-        if (field) {
-            value = field.convertTypeWithDefault(value)
-        }
+        if (field) value = field.convertTypeWithDefault(value)
         target[key] = value
         return true
     }
@@ -51,12 +49,7 @@ FilterModel.prototype.$fill = function (data) {
     const queryData = this.constructor.$queryUrl.queryParamsParse()
     this.constructor.eachFields(field => {
         // конвертируем тип значения
-        const value = field.convertTypeWithDefault(data?.[field.name])
-        this.set(
-            this,
-            field.name,
-            'object' === typeof value && value ? structuredClone(value) : value
-        )
+        this.set(this, field.name, field.convertTypeWithDefault(data?.[field.name]))
     })
 }
 
