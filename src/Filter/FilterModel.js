@@ -64,7 +64,7 @@ Object.defineProperty(FilterModel.prototype, '$queryParams', {
         this.constructor.eachFields(field => {
             let value = this[field.name]
             'object' === field.type &&
-                field.filter !== 'globalSearch' &&
+                !['globalSearch', 'groups'].includes(field.filter) &&
                 value &&
                 Object.keys(field.itemOf).forEach(key => {
                     if (field.isEmptyValue(this[field.name]?.[key])) value = null
