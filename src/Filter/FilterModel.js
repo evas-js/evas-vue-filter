@@ -83,7 +83,6 @@ FilterModel.isRootModel = function () {
 // require('evas-vue/src/Model/Model.fields.js')
 // require('evas-vue/src/Model/Model.fields.display.js')
 // require('evas-vue/src/Model/Model.relations.js')
-// require('evas-vue/src/Model/Model.validate.js')
 // require('evas-vue/src/Model/Model.state.js')
 
 require('./FilterModel.fields.js')
@@ -91,3 +90,4 @@ require('./FilterModel.relations.js')
 require('./FilterModel.display.js')
 require('./FilterModel.state.js')
 require('./FilterModel.contract.js')
+require('./FilterModel.validate.js')
